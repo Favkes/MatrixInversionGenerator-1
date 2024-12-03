@@ -8,6 +8,7 @@
     and potentially simplify them as well.
 """
 import numpy as np
+import RealArithmetic as re
 
 
 def gen_elements_matrix(dims: tuple[int, int]):
@@ -31,16 +32,22 @@ class ArithmeticalMatrix:
 
     def __init__(self, input_matrix: np.array):
         self.dims = input_matrix.shape[:2]
+        lst = []
+        for row in input_matrix:
+            for element in row:
+                lst.append(re.RealNumber(int(element)))
+        input_matrix = np.reshape(np.array(lst, dtype=object), self.dims)
         self.input_matrix = input_matrix
         self.body_matrix = gen_elements_matrix(input_matrix.shape[:2])
         self.unit_matrix = np.diag([1,] * input_matrix.shape[0])
 
     def alpha(self):
-        """Gaussian elimination part of the algorithm."""
+        """Gaussian elimination method - part 1. of the algorithm."""
         y, x = self.dims
         A = self.input_matrix
         for y_ in range(1, y):
             psi = A[y_, 0] / A[0, 0]
+            print('psi >', psi)
             for x_ in range(x):
                 A[y_, x_] = A[y_, x_] - A[0, x_] * psi
 
@@ -65,8 +72,8 @@ A = np.round(np.random.rand(3, 3) * 10)
 I = np.diag([1,] * 2)
 
 M = ArithmeticalMatrix(A)
-# print(M)
+print(M)
 
 M.alpha()
-# print(M)
+print(M)
 

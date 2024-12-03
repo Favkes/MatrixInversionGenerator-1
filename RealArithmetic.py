@@ -36,14 +36,16 @@ class RealNumber:
         self.den = abs(den)
 
     def __mul__(self, other):
-        self.num *= other.num
-        self.den *= other.den
-        self.sign_check()
-        return self
+        return RealNumber(
+            self.num*other.num,
+            self.den*other.den
+        )
 
     def __truediv__(self, other):
-        other.num, other.den = other.den, other.num
-        return self * other
+        return self * RealNumber(
+            other.den,
+            other.num
+        )
 
     def __add__(self, other):
         num1 = self.num
@@ -55,16 +57,24 @@ class RealNumber:
         num1 *= lcd // den1
         num2 *= lcd // den2
 
-        self.num = num1+num2
-        self.den = lcd
-        return self
+        return RealNumber(
+            num1+num2,
+            lcd
+        )
 
     def __neg__(self):
-        self.num = -self.num
-        return self
+        return RealNumber(
+            -self.num,
+            self.den
+        )
 
     def __sub__(self, other):
         return self + (-other)
 
     def __str__(self):
         return f'{self.num}/{self.den}'
+
+# a = RealNumber(2, 5)
+# b = RealNumber(1, 5)
+# print(a, b)
+# print(a / b)

@@ -1,16 +1,56 @@
-# This is a sample Python script.
+"""
+    This project is a continuation to my already existing work on
+    matrix inverses and generalizing the formulae for finding them.
+    I have manually created a working equation matrix for finding
+    inverses of 2x2 matrices, however even 3x3 have already proven
+    too complex to be done by hand.
+    Therefore this code will generate these huge equations automatically,
+    and potentially simplify them as well.
+"""
+import numpy as np
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+
+def gen_elements_matrix(dims: tuple[int, int]):
+    y, x = dims
+    lst = [None] * x * y
+    i = 0
+    for y_ in range(y):
+        for x_ in range(x):
+            lst[i] = f'a_{y_}_{x_}'
+            i += 1
+    arr = np.array(lst, dtype=object)
+    arr = np.reshape(arr, (y, x))
+    return arr
 
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+class ArithmeticalMatrix:
+    unit_matrix: np.array
+    body_matrix: np.array
+    input_matrix: np.array
+
+    def __init__(self, input_matrix: np.array):
+        self.input_matrix = input_matrix
+        self.body_matrix = gen_elements_matrix(input_matrix.shape[:2])
+        self.unit_matrix = np.diag([1,] * input_matrix.shape[0])
+
+    def __str__(self):
+        y, x = self.input_matrix.shape
+        inM = self.input_matrix
+        bdM = self.body_matrix
+        unM = self.unit_matrix
+        s = ''
+        for y_ in range(y):
+            inS = bdS = unS = ''
+            for x_ in range(x):
+                inS += f'{inM[y_, x_]}, '
+                bdS += f'{bdM[y_, x_]}, '
+                unS += f'{unM[y_, x_]}, '
+            s += f'[{inS[:-2]} | {unS[:-2]} | {bdS[:-2]}]\n'
+        return s
 
 
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
+A = np.round(np.random.rand(2, 2) * 10)
+I = np.diag([1,] * 2)
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+M = ArithmeticalMatrix(A)
+print(M)

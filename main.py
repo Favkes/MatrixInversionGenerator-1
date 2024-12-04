@@ -12,6 +12,7 @@ import RealArithmetic as re
 
 
 def gen_elements_matrix(dims: tuple[int, int]):
+    """ Generates a matrix of arithmetical element variables. """
     y, x = dims
     lst = [None] * x * y
     i = 0
@@ -24,6 +25,16 @@ def gen_elements_matrix(dims: tuple[int, int]):
     return arr
 
 
+def matrix_int2real(matrix):
+    """ Converts a matrix of dtype int to dtype RealNumber """
+    lst = []
+    for row in matrix:
+        for element in row:
+            lst.append(re.RealNumber(int(element)))
+    matrix = np.reshape(np.array(lst, dtype=object), matrix.shape[:2])
+    return matrix
+
+
 class ArithmeticalMatrix:
     dims: tuple[int, int]
     unit_matrix: np.array
@@ -33,48 +44,76 @@ class ArithmeticalMatrix:
     def __init__(self, input_matrix: np.array):
         self.dims = input_matrix.shape[:2]
 
-        lst = []
-        for row in input_matrix:
-            for element in row:
-                lst.append(re.RealNumber(int(element)))
-        input_matrix = np.reshape(np.array(lst, dtype=object), self.dims)
-        self.input_matrix = input_matrix
+        self.input_matrix = matrix_int2real(
+            input_matrix
+        )
+        self.unit_matrix = matrix_int2real(
+            np.diag([1,] * input_matrix.shape[0])
+        )
 
         self.body_matrix = gen_elements_matrix(input_matrix.shape[:2])
-        self.unit_matrix = np.diag([1,] * input_matrix.shape[0])
 
     def alpha(self):
         """Gaussian elimination method - part 1. of the algorithm."""
         y, x = self.dims
         A = self.input_matrix
+        B = self.unit_matrix
+
         for y_ in range(1, y):
             psi = A[y_, 0] / A[0, 0]
             for x_ in range(x):
                 A[y_, x_] = A[y_, x_] - A[0, x_] * psi
+                B[y_, x_] = B[y_, x_] - B[0, x_] * psi
 
 
     def __str__(self):
         y, x = self.dims
         inM = self.input_matrix
-        bdM = self.body_matrix
         unM = self.unit_matrix
-        s = ''
-        for y_ in range(y):
-            inS = bdS = unS = ''
-            for x_ in range(x):
-                inS += f'{inM[y_, x_]}, '
-                bdS += f'{bdM[y_, x_]}, '
-                unS += f'{unM[y_, x_]}, '
-            s += f'[{inS[:-2]} | {unS[:-2]} | {bdS[:-2]}]\n'
-        return s
+        bdM = self.body_matrix
+
+
+        def prepare_columns(matrix):
+            out = [[''] * x for _ in range(y)]
+            for x_ in range(x - 1):
+                for y_ in range(y):
+                    out[x_][y_] = f'{matrix[y_, x_]}, '
+            for y_ in range(y):
+                out[-1][y_] = f'{matrix[y_, -1]}'
+            return out
+
+        inCol = prepare_columns(inM)
+        unCol = prepare_columns(unM)
+        bdCol = prepare_columns(bdM)
+
+        def prepare_rows(prepared_columns):
+            out = ['']*y
+            for col in prepared_columns:
+                lenCol = [i for i in map(len, col)]
+                largest = max(lenCol)
+
+                for row in range(y):
+                    out[row] += col[row] + ' '*(largest-lenCol[row])
+            return out
+
+        in_s = prepare_rows(inCol)
+        un_s = prepare_rows(unCol)
+        bd_s = prepare_rows(bdCol)
+
+        glued = zip(in_s, un_s, bd_s)
+
+        S = ''
+        for row in glued:
+            S += f'[ {row[0]} | {row[1]} | {row[2]} ]\n'
+
+        return S
 
 
 A = np.round(np.random.rand(3, 3) * 10)
-I = np.diag([1,] * 2)
 
 M = ArithmeticalMatrix(A)
 print(M)
 
-M.alpha()
-print(M)
+# M.alpha()
+# print(M)
 

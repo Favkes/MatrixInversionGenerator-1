@@ -35,17 +35,28 @@ class RealNumber:
         self.num = abs(num) * self.sgn
         self.den = abs(den)
 
+    def simplify(self):
+        """ Converts the number into the simplest fraction possible. """
+        divisor = gcd(abs(self.num), self.den)
+        self.num //= divisor
+        self.den //= divisor
+
+
     def __mul__(self, other):
-        return RealNumber(
+        out = RealNumber(
             self.num*other.num,
             self.den*other.den
         )
+        out.simplify()
+        return out
 
     def __truediv__(self, other):
-        return self * RealNumber(
+        out = self * RealNumber(
             other.den,
             other.num
         )
+        out.simplify()
+        return out
 
     def __add__(self, other):
         num1 = self.num
@@ -57,21 +68,33 @@ class RealNumber:
         num1 *= lcd // den1
         num2 *= lcd // den2
 
-        return RealNumber(
+        out = RealNumber(
             num1+num2,
             lcd
         )
+        out.simplify()
+        return out
 
     def __neg__(self):
-        return RealNumber(
+        out = RealNumber(
             -self.num,
             self.den
         )
+        out.simplify()
+        return out
 
     def __sub__(self, other):
-        return self + (-other)
+        out = self + (-other)
+        out.simplify()
+        return out
 
     def __str__(self):
+        if self.num == 0:
+            return '0'
+
+        if self.den == 1:
+            return str(self.num)
+
         return f'{self.num}/{self.den}'
 
 # a = RealNumber(2, 5)
